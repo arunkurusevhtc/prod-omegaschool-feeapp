@@ -13,15 +13,15 @@ $columns = array('Date','Existing',' New','Total');
     <div class="form-group col-lg-3">
         <label>Acad.Year</label>
         <select name="dtwise_yearselect" id="dtwise_yearselect"  class="yearselect form-control ">
-        <option value="">Acad.Year</option>
+        <option value="">All</option>
         <?php
         foreach($yearchecks as $yearcheck) {
-        if($yearcheck['status']=='ACTIVE'){
+        /*if($yearcheck['status']=='ACTIVE'){
         $sel='selected="selected"';
         }else{
         $sel='';
-        }
-        echo '<option value="'.$yearcheck['id'].'" '.$sel.' >'.$yearcheck['year'].'</option>';
+        }*/
+        echo '<option value="'.$yearcheck['id'].'">'.$yearcheck['year'].'</option>';
         }
         ?>
         </select>
@@ -29,7 +29,7 @@ $columns = array('Date','Existing',' New','Total');
     <div class="form-group col-lg-3">
         <label>Term</label>
         <select name="dtwise_semesterselect" id="dtwise_semesterselect"  class="form-control ">
-        <option value="">Semester</option>
+        <option value="">All</option>
         <?php
         foreach($semestercheck as $semester) {
         echo '<option value="'.$semester['semester'].'" >'.$semester['semester'].'</option>';
