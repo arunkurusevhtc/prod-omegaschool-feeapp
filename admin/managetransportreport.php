@@ -1,0 +1,247 @@
+<?php
+    include_once('admnavbar.php');
+    $status= array('Ok' => 'Completed', 'F' => 'Failed', 'C' => 'Canceled', 'N' => 'Not Updated');
+
+    //createTFPDF('4164','CBSE2021/246162');
+    //exit;
+?>
+<div class="container-fluid  contentcheque tfchequerevoke">
+<div class="row col-md-12">
+         <div class="col-xs-1 col-sm-2 col-md-3 col-lg-4"></div>
+         <div class="col-xs-10 col-sm-8 col-md-6 col-lg-4">
+               
+
+                    
+                     <?php
+                  if(isset($_SESSION['successclass'])) {
+                  echo $_SESSION['successclass'];
+                  unset($_SESSION['successclass']);
+                      }
+                  if(isset($_SESSION['errorclass'])) {
+                  echo $_SESSION['errorclass'];
+                  unset($_SESSION['errorclass']);
+                      }
+                  if(isset($_SESSION['success'])) {
+                  echo $_SESSION['success'];
+                  unset($_SESSION['success']);
+                      }
+                  if(isset($_SESSION['failure'])) {
+                  echo $_SESSION['failure'];
+                  unset($_SESSION['failure']);
+                      }
+                 if(isset($_SESSION['successcheque'])) {
+                   echo $_SESSION['successcheque'];
+                   unset($_SESSION['successcheque']);
+                } elseif(isset($_SESSION['errorcheque'])) {
+                   echo $_SESSION['errorcheque'];
+                   unset($_SESSION['errorcheque']);
+                }
+
+                    ?>
+         </div>
+         <div class="col-xs-1 col-sm-2 col-md-3 col-lg-4"></div>
+</div>
+<div class="col-md-12">
+    <div class="col-md-6 p-l-0">
+        <h2 class="top">Transport Fees</h2>
+    </div>
+
+        <form  id="otherfeefilters" class="form-inline">
+            <div class=col-lg-12 p-r-0 text-right">
+                <div class="form-group">
+                    <?php
+                        $yearchecks = sqlgetresult("SELECT * FROM yearcheck",true);
+                        ?>
+                    <select name="yearselect" id="yearselect"  class="yearselect form-control ">
+                        <option value="">Acad.Year</option>
+                        <?php
+                            foreach($yearchecks as $yearcheck) {
+                            echo '<option value="'.$yearcheck['id'].'" >'.$yearcheck['year'].'</option>';
+                            }
+                            ?>
+                    </select>
+            </div>            
+            <div class="form-group">
+                    <?php
+                        $streamtypes = sqlgetresult("SELECT * FROM streamcheck",true);
+                        ?>
+                    <select name="streamselect" id="streamselect"  class="streamselect form-control ">
+                        <option value="">Stream</option>
+                        <?php
+                            foreach($streamtypes as $stream) {
+                            echo '<option value="'.$stream['id'].'" >'.$stream['stream'].'</option>';
+                            }
+                            ?>
+                    </select>
+            </div>
+             <div class="form-group">
+
+                        <?php
+                          $classstypes = sqlgetresult("SELECT * FROM classcheck",true);
+                        ?>
+                       <select id="classselect" name="classselect"  class="classselect  form-control classchange">
+                        <option value="">-Class-</option>
+                      <?php
+                      foreach($classstypes as $class) {
+                      echo '<option value="'.$class['id'].'">'.$class['class_list'].'</option>';
+                      }
+                      ?>
+                     </select>
+            </div>
+            <div class="form-group">
+                <?php
+                    $semestercheck = sqlgetresult('SELECT * FROM tbl_semester',true);
+                ?>
+                <select name="semesterselect" id="semesterselect"  class="semesterselect form-control ">
+                <option value="">Semester</option>
+                <?php
+                    foreach($semestercheck as $semester) {
+                        echo '<option value="'.$semester['semester'].'" >'.$semester['semester'].'</option>';
+                    }
+                ?>
+                </select>
+            </div>
+               
+            
+            <div class="form-group">
+                <label>Ref Number</label>
+                <input type="text" name="txtref" id="txtref" placeholder="Ref Number" class="form-control">
+            </div>
+            <div class="form-group">
+                <select name="type" id="type"  class="type form-control " readonly>
+                    <option value="3" selected="selected">Transport</option>
+                </select>
+            </div> 
+            <div class="form-group">
+                    <label>From</label>
+                    <input type="text" name="from" id="from" placeholder="From Date" class="form-control datepicker">
+                    <label>To</label>
+                    <input type="text" name="to" id="to" placeholder="To Date" class="form-control datepicker">
+            </div>
+            <div class="form-group">
+                <?php
+                   $feeTypes = sqlgetresult('SELECT id, "feeType" FROM getfeetypes WHERE applicable ILIKE \'%T%\' ',true);
+                ?>
+                <input type="hidden" id="selected_feetypes" name="selected_feetypes" class="selected_quizsetids">
+                <select name="feetype"  class="quizsetid form-control" multiple="multiple" required>
+                    <?php
+                    $feetypesgroup = sqlgetresult("SELECT * FROM feegroupcheck",true);
+                    // print_r($feetypesgroup);                                   
+                        echo '<optgroup label="FEE GROUP"></optgroup>';
+                        foreach($feeTypes as $feetype) {
+                            echo '<option value="'.$feetype['id'].'">'.$feetype['feeType'].'</option>';
+                        }                               
+                        
+                    ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Payment Method</label>
+                <select name="method" id="method"  class="form-control ">
+                    <option value="">-All-</option>
+                    <?php 
+                    foreach ($p_methods as $value) {
+                        ?>
+                        <option value="<?php echo $value; ?>"><?php echo ucfirst($value); ?></option>
+                        <?php
+                    }
+                    ?>                    
+                </select>
+            </div>
+            <div class="form-group">
+                <select name="tstatus" id="tstatus"  class="tstatus form-control ">
+                    <option value="">-All-</option>
+                    <?php 
+                      
+                    foreach ($status as $key => $value) {
+                        
+                        if($key=='Ok'){
+                            $sel1="selected='selected'";
+                        }else{
+                           $sel1=""; 
+                        }
+                    ?>
+                    <option value="<?php echo $key; ?>" <?php echo $sel1; ?>><?php echo $value; ?></option>
+                    <?php
+                    }
+                    ?>                    
+                </select>
+            </div> 
+            <div class="form-group">
+              <button type="button" id="otherTransfeeflt" name="filter" value="otherfeefilter" class="btn btn-info">Filter</button>
+            </div>
+            <div class="form-group">
+                <a href="" class="btn btn-info othertransportexportexcel">Export Excel</a>
+            </div>
+            </div>
+        </form>
+    
+</div>
+<div style="clear:both">&nbsp;</div>
+<div class="col-md-12">
+    <div class="form-group pull-right ">
+        <a href="addtransportfee.php" class="btn btn-info" ><span >Add Payment</span></a>
+    </div>
+</div>
+<div class="col-md-12 m-t-15" >
+    <div class="table-responsive">
+        <form  method="post" action="adminactions.php">
+            <button type = "submit" name="submit" id="clickme" value="createtransportchallanfrmpaid" class = "btn btn-info sendnewsms"  disabled="disabled">Create Transport Challan</button>
+            <table class="table table-bordered admintab dataTableTeachers">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="checkAll" name="checkme"></th>
+                        <th>StudentId</th>
+                        <th>Name</th>
+                        <th>Stream</th>
+                        <th>Semester</th>
+                        <th>Class</th>
+                        <th>Section</th>
+                        <th>AcademicYear</th>
+                        <th>ChallanNumber</th>
+                        <th>FeeType</th>
+                        <th>PaidDate</th>
+                        <th>RefNumber</th>
+                        <th>Total</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+            </table>
+        </form>
+    </div>
+</div>
+<!-- </div> -->
+</div>
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close closed" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Cheque Revoke</h4>
+            </div>
+            <div class="modal-body chequerevokecon">
+                <h4 class="addtitle">Are you Sure you want to Revoke the particular Challan.</h4>
+                <div class = "col-xs-2-12" >
+                <div class = "col-xs-2"></div>
+                    <form action="adminactions.php" method=POST id="chequerevokeform">
+                        <div class = "col-xs-8 chequerevokemain">
+                            <input type="hidden" name="stdidforcheque" id="stdidforcheque" class="stdidforcheque">
+                            <input type="hidden" name="logid" id="logid">
+                            <input type="checkbox" id="chequerevokechecktrans" name="chequerevokechecktrans" class="chequerevokechecktrans" value="revoke"> Revoke<br>
+                            <button class="btn btn-primary chequerevokesubmit" id="chequerevoketranssubmit" name="chequerevoketrans" value="chequerevoketrans" type="submit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+                <div class = "col-xs-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row comment">
+</div>
+
+<?php
+include_once(BASEPATH.'footer.php');
+?>

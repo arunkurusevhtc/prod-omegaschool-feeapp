@@ -1,0 +1,29 @@
+# ignore specific files
+config.php
+# ignore node dependency directories
+node_modules/
+vendor/
+settlementreports/
+taxexemption/
+topupreports/
+receipts/
+notificationlogs/
+logs/
+audit_logs/
+
+# ignore log files and databases
+*.log
+*.sql
+*.sqlite
+*~
+*.bak
+
+# ignore packaged files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
