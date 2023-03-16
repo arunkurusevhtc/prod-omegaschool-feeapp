@@ -11558,7 +11558,7 @@ function getBetweenDates($startDate, $endDate) {
     $endDate = strtotime($endDate);
  
     for ($currentDate = $startDate; $currentDate <= $endDate; $currentDate += (86400)) {
-        $date = date('m-d-Y', $currentDate);
+        $date = date('d-m-Y', $currentDate);
         //$date = date('Y-m-d', $currentDate);
         $rangArray[] = $date;
     }
@@ -11608,7 +11608,7 @@ function toGetDatewiseReportForDashboard($stream_select, $selectedYear, $ststatu
             $receipt_total=$org_total;
             $transDate = trim($type['transDate'])??'';
             if($transDate){
-               $transDate =  date('m-d-Y', strtotime($transDate));
+               $transDate =  date('d-m-Y', strtotime($transDate));
             }
         
             if ( stristr( $studentId, 'APPL' ) ) {
