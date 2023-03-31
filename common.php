@@ -5900,4 +5900,8 @@ function toGetPartialRDCount($studId, $cautionflter, $datenow='') {
     $data  = sqlgetresult('SELECT COUNT(*) as num FROM challandatanew WHERE "studentId" =\'' . $studId . '\'  AND "studStatus"!=\'Transport.Fee\' AND ("challanStatus" = \'0\' OR "challanStatus" = \'2\') AND ("challanNo" ILIKE \'%'.$cautionflter.'%\') AND "academicYear" >=6'. $where);
     return $data['num'];    
 }
+function getPaymentMethodType($remark) {
+	$data  = sqlgetresult('SELECT "paymentmethod" FROM tbl_partial_payment_log WHERE "transNum" = \''.$remark.'\' ');
+	return $data['paymentmethod'];
+}
 ?>

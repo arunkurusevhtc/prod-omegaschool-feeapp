@@ -11774,4 +11774,137 @@ if(isset($_POST['dashboard']) && $_POST['dashboard']=='summary'){
     echo json_encode($outputdata);
 }
 
+// **********SFS RECEIPT REPORT EXPORT START************//
+if (isset($_POST['excel']) && $_POST['excel'] == "sfsreceiptreportexport"){
+    $year = trim($_POST['yearselect']);
+    $semester = trim($_POST['semesterselect']);
+    $stream = getStreambyId(trim($_POST['streamselect']));
+    $class = getClassbyNameId(trim($_POST['classselect']));
+    $reporttype = trim($_POST['reporttype']);
+    $fromdate = trim($_POST['fromdate']);
+    $todate = trim($_POST['todate']);
+
+    $whereClauses = array(); 
+    if (! empty($year)) 
+        $whereClauses[] ='"academicYear"=\''.trim(pg_escape_string($year)).'\' ' ;
+    $where='';
+
+    if (! empty($semester)) 
+        $whereClauses[] ='"term"=\''.trim(pg_escape_string($semester)).'\' ' ;
+    $where='';
+
+    if (! empty($stream)) 
+        $whereClauses[] ='"stream"=\''.trim(pg_escape_string($stream)).'\' ' ;
+    $where='';
+
+    if (! empty($class)) 
+        $whereClauses[] ='"class"=\''.trim(pg_escape_string($class)).'\' ' ;
+    $where='';
+
+    if (! empty($reporttype)) 
+        $whereClauses[] ='"entryType"=\''.trim(pg_escape_string($reporttype)).'\' ' ;
+    $where='';
+
+    if (! empty($fromdate) && ! empty($todate)) 
+        $whereClauses[] ='"date" BETWEEN \''.trim(pg_escape_string(date("m/d/Y", strtotime($fromdate)))).'\' AND \''.trim(pg_escape_string(date("m/d/Y", strtotime($todate)))).'\'' ;
+        $where='';
+  
+    if (count($whereClauses) > 0) 
+    { 
+      $where = ' WHERE '.implode(' AND ',$whereClauses); 
+    }   
+
+    $sql = ('SELECT * FROM  tbl_student_ledger'. $where . ' ORDER BY "challanNo"');
+    
+    $sqlrun = sqlgetresult($sql, true);
+    
+    if($sqlrun != ''){
+        
+            $challan = array();
+            $feeGroupList = sqlgetresult('SELECT "feeGroup" FROM tbl_fee_group WHERE id=10');
+            $FeeGroups[] = $feeGroupList['feeGroup'];
+            $FeegroupData = array();
+
+            foreach ($FeeGroups as $feegroup) {
+                $FeegroupData[] = ucwords(strtolower($feegroup)).' Receipt';
+            }
+
+            $columns = array('S.No','Student Id','Challan No','Student Name','Academic Year','Term','Stream','Class','Date','Challan Status');
+            $columns = array_merge($columns, $FeegroupData);
+            array_push($columns,"Receipt","Receipt Details", "Payment Method");
+            $i = 1;
+            foreach ($sqlrun as $k => $data) 
+            {    
+                $a = array_map('trim', array_keys($data));
+                $b = array_map('trim', $data);
+                $data = array_combine($a, $b);          
+                $challanData['Student Id'] = trim($data['studentId']);
+                $challanData['Challan No'] = trim($data['challanNo']);
+                $challanData['Student Name'] = trim($data['studentName']);
+                $challanData['Academic Year'] = trim($data['academicYear']);
+                $challanData['Term'] = trim($data['term']);
+                $challanData['Stream'] = trim($data['stream']);
+                $challanData['Class'] = trim($data['class']);
+                $challanData['Date'] = $data['date'];
+                $challanData['Receipt Details'] = $data['remarks'];
+                if(substr($data['remarks'], 0, 3) === 'REF'){
+                    $challanData['Payment Method'] = getPaymentMethodType(substr($data['remarks'], 0, 9));
+                }else{
+                    $challanData['Payment Method'] = '';
+                }
+                if($data['challanStatus'] == 1){
+                $challanData['Challan Status'] = "Active";
+                }
+                else{
+                $challanData['Challan Status'] = "In Active";   
+                }   
+                
+                $feeGroup['name'] = trim($data['feeGroup']);
+                    foreach ($FeeGroups as $v) {
+                        $amt = ucwords(strtolower($v)).' Receipt';
+                        if ( trim($v) == $feeGroup['name'] ) {
+                            $entrytype = 'RECEIPT';
+                            $FEEGROUPRECEIPT[$amt][] = getfeegroupamountfromledger($feeGroup['name'], $data['challanNo'],$entrytype);
+                        }
+                         else {
+                            $FEEGROUPRECEIPT[$amt][] = '0';
+                        }
+                    }   
+
+
+                if( $data['challanNo'] != $sqlrun[$k+1]['challanNo'] ) {
+                    $challanData['S.No'] = $i;
+                    $receipttotal = 0;
+                    foreach ($FEEGROUPRECEIPT as $fee1 => $val1) {
+                        $challanData[$fee1] = array_sum(array_unique($val1));
+                        if (stripos($fee1,'receipt')) {
+                            $receipttotal += array_sum(array_unique($val1));
+                        }               
+                    }
+
+                    $challanData['Receipt'] = $receipttotal;
+                    if($challanData['Receipt'] !== 0){
+                        array_push($challan, $challanData);
+                        $i++;
+                    }
+                    $FEEGROUPRECEIPT = array();         
+                }      
+            }
+            $columns = array_unique($columns);
+            $header = "LALAJI MEMORIAL OMEGA INTERNATIONAL SCHOOL -SFS RECEIPT REPORT (".$data['academicYear']. "-" .$data['term']." SEM)";
+            $_SESSION['splitreportsuccess'] = "<p class='success-msg'>Excel Exported Successfully</p>";
+            exportData($challan, $header, $columns);
+            header('location:sfsreportreceiptexport.php');
+
+    }
+    else{
+        $_SESSION['splitreporterror'] = "<p class='error-msg'>No Data available</p>";
+    }
+
+
+    header('location:sfsreportreceiptexport.php');
+}
+
+// **********SFS RECEIPT REPORT EXPORT END************//
+
 ?>
