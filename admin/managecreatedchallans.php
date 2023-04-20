@@ -101,6 +101,14 @@
                     </select>
                 </div>
             </div>
+            <div class="form-group">
+                <div>
+                    <select id="challanstatus" name="challanstatus"  class="challanstatus  form-control">
+                        <option value="0">Active</option>                       
+                        <option value="1">In Active</option>                       
+                    </select>
+                </div>
+            </div>
 
             <button type="button" id="fltcreatedchallan" name="fltcreatedchallan" value="filtercreatedchallan" class="btn btn-info">Filter</button>
        

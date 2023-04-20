@@ -82,6 +82,14 @@ include_once('admnavbar.php');
                     </select>
             </div>
             <div class="form-group">
+                <select name="challanstatus" id="challanstatus"  class="challanstatus form-control">
+                    <option value="">-Status-</option>
+                    <option value="1">Paid</option>
+                    <option value="2">Partial Paid</option>
+                    <option value="3">Not Paid</option>
+                </select>
+            </div>
+            <div class="form-group">
                     <label>Student ID</label>
                     <input type="text" name="stid" id="stid" placeholder="Student ID" class="form-control">
             </div>

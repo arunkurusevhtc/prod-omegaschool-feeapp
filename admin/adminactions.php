@@ -2916,6 +2916,7 @@ if (isset($_POST['filter']) && $_POST['filter'] == "filtercreatedchallan")
     $sectionselect = @$_POST['sectionselect'];
     $yearselect = @$_POST['yearselect'];
     $semesterselect = @$_POST['semesterselect'];
+    $challanstatus = isset($_POST['challanstatus'])?$_POST['challanstatus']:"";
 
    $whereClauses = array(); 
    if (! empty($yearselect)) 
@@ -2937,6 +2938,10 @@ if (isset($_POST['filter']) && $_POST['filter'] == "filtercreatedchallan")
     if (! empty($sectionselect)) 
       $whereClauses[] ="section='".pg_escape_string ($sectionselect)."'"; 
     $where = ''; 
+
+    if (! empty($challanstatus)) 
+    $whereClauses[] ="deleted='".pg_escape_string ($challanstatus)."'"; 
+    $where = '';
 
     if (count($whereClauses) > 0) 
     { 
@@ -7064,6 +7069,96 @@ if (isset($_POST["submit"]) && $_POST["submit"] == "enablePartialPayment")
 
 }
 
+/* Enable Student Status Active/Inactive */
+if (isset($_POST["std_status_change"]) && $_POST["std_status_change"] == "std_status_change")
+{
+    $uid = $_SESSION['myadmin']['adminid'];
+    $ids = isset($_POST['checkme'])?$_POST['checkme']:[];
+    $chkstatus = isset($_POST['changestatus'])?trim($_POST['changestatus']):"";
+    if (count($ids) > 0 && !empty($chkstatus) && isset($uid))
+    {
+        if($chkstatus == 'Active'){
+           $status=1;
+        }else{
+            $status=0;
+        }
+        $tbl = 'tbl_student';
+        foreach ($ids as $selected)
+        {
+            //$query = "SELECT * FROM tochangestudentstatus('$selected','$uid','$status')";
+            $query = "SELECT * FROM statusupdate('$tbl','$status','$uid','$selected')";
+            $run = sqlgetresult($query);
+        }
+        $_SESSION['successstd'] = "<p class='success-msg'>Student Status Updated Successfully.</p>";
+        header('location:managestd.php');
+    }else{
+        $_SESSION['errorclass'] = "<p class='error-msg'>Some error has been occured. Please try again.</p>";
+        header('location:managestd.php');
+    }
+}
+/* To Change Acadamic Year For the Student */
+if (isset($_POST["change_ay"]) && $_POST["change_ay"] == "edit_ay")
+{
+    $uid = $_SESSION['myadmin']['adminid'];
+    $ids=isset($_POST['checkme'])?$_POST['checkme']:[];
+    $yearselect=isset($_POST['yearselect'])?trim($_POST['yearselect']):"";
+    if (count($ids) > 0 && !empty($yearselect) && isset($uid))
+    {
+        foreach ($ids as $selected)
+        {
+            $query = "SELECT * FROM tochangeayearinstudtbl('$selected','$yearselect','$uid')";
+            $run = sqlgetresult($query);
+        }
+        $_SESSION['successstd'] = "<p class='success-msg'>Successfully updated.</p>";
+    }else{
+        $_SESSION['errorstd'] = "<p class='error-msg'>Some error has been occured. Please try again.</p>";
+    }
+    header('location:managestd.php');
+}
+/* To Change Term For the Student */
+if (isset($_POST["change_term"]) && $_POST["change_term"] == "edit_tm")
+{
+    $uid = $_SESSION['myadmin']['adminid'];
+    $ids=isset($_POST['checkme'])?$_POST['checkme']:[];
+    $semesterselect=isset($_POST['semesterselect'])?trim($_POST['semesterselect']):"";
+    if (count($ids) > 0 && !empty($semesterselect) && isset($uid))
+    {
+        foreach ($ids as $selected)
+        {
+           $query = "SELECT * FROM tochangeterminstudtbl('$selected','$semesterselect','$uid')";
+           $run = sqlgetresult($query);
+        }
+        $_SESSION['successstd'] = "<p class='success-msg'>Successfully updated.</p>";
+    }else{
+        $_SESSION['errorstd'] = "<p class='error-msg'>Some error has been occured. Please try again.</p>"; 
+    }
+    header('location:managestd.php');
+}
+
+/* To Change Stream/Class/Section For the Student */
+if (isset($_POST["change_stream_class"]) && $_POST["change_stream_class"] == "edit_stream_class")
+{
+    $uid = $_SESSION['myadmin']['adminid'];
+    $ids=isset($_POST['checkme'])?$_POST['checkme']:[];
+    $stream = isset($_POST['managestdstream'])?trim($_POST['managestdstream']):"";
+    $class = isset($_POST['classselect'])?trim($_POST['classselect']):"";
+    $section = isset($_POST['sectionselect'])?trim($_POST['sectionselect']):"";
+    
+    if (count($ids) > 0 && !empty($stream) && !empty($class) && !empty($section) && isset($uid))
+    {
+        foreach ($ids as $selected)
+        {
+        //    $query = "SELECT * FROM tochangeterminstudtbl('$selected','$stream','$class','$section','$uid')";
+           $query = "SELECT * FROM tochangestreamclassstud('$selected','$uid','$stream','$class','$section')";
+           $run = sqlgetresult($query);
+        }
+        $_SESSION['successstd'] = "<p class='success-msg'>Successfully updated.</p>";
+    }else{
+        $_SESSION['errorstd'] = "<p class='error-msg'>Some error has been occured. Please try again.</p>"; 
+    }
+    header('location:managestd.php');
+}
+
 /* Delete partial payment student list */
 
 if (isset($_POST["submit"]) && $_POST["submit"] == "deletepartial")
@@ -7523,6 +7618,7 @@ if (isset($_POST['filter']) && $_POST['filter'] == "fltconsolidatereport")
     $streamselect = isset($_POST['streamselect'])?trim($_POST['streamselect']):"";
     $semesterselect = isset($_POST['semesterselect'])?trim($_POST['semesterselect']):"";
     $academicyr = isset($_POST['yearselect'])?trim($_POST['yearselect']):"";
+    $challanstatus = isset($_POST['challanstatus'])?trim($_POST['challanstatus']):"";
     $stid = isset($_POST['stid'])?trim($_POST['stid']):"";
     //$from = isset($_POST['from'])?trim($_POST['from']):"";
     //$to = isset($_POST['to'])?trim($_POST['to']):"";
@@ -7554,6 +7650,15 @@ if (isset($_POST['filter']) && $_POST['filter'] == "fltconsolidatereport")
     {
         $where[] = 'c."studentId"=\'' . $stid . '\' ';
 
+    }
+
+    if (!empty($challanstatus))
+    {
+        if($challanstatus=='3'){
+          $where[] ='c."challanStatus"=\'0\' ' ;
+        }else{
+          $where[] ='c."challanStatus"=\'' .pg_escape_string($challanstatus). '\' ';
+        }
     }
 
     /*if (!empty($from) && !empty($to))

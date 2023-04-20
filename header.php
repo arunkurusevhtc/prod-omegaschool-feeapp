@@ -58,7 +58,7 @@
     <?php
     	if ( strpos($page, 'admin') !== false ) {
     ?>
-		<script src="<?php echo BASEURL;?>admin/js/adminscript.min.js?v=25.1" type="text/javascript" async defer></script>
+		<script src="<?php echo BASEURL;?>admin/js/adminscript.min.js?v=27.1" type="text/javascript" async defer></script>
 	<?php
 		} else {
 	?>	
