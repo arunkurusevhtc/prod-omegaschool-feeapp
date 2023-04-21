@@ -104,7 +104,7 @@
             <div class="form-group">
                 <div>
                     <select id="challanstatus" name="challanstatus"  class="challanstatus  form-control">
-                        <option value="0">Active</option>                       
+                        <option value="3">Active</option>                       
                         <option value="1">In Active</option>                       
                     </select>
                 </div>
@@ -152,6 +152,8 @@
                     </tr>
                 </thead>
             </table>
+            <button type = "submit" name="submit" id="clickme" value="enablechallan" class = "btn btn-primary sendnewsms"  disabled="disabled" onclick="return confirm('Are you sure want to enable?');">Enable</button>
+            <button type = "submit" name="submit" id="clickme" value="disablechallan" class = "btn btn-primary sendnewsms"  disabled="disabled" onclick="return confirm('Are you sure want to disable?');">Disable</button>
             <button type = "submit" name="submit" id="clickme" value="deletechallan" class = "btn btn-info sendnewsms"  disabled="disabled" onclick="return confirm('Are you sure want to delete?');">Delete</button>
             <button type = "submit" name="submit" id="movetopaid" value="movetopaid" class = "btn btn-info sendnewsms"  disabled="disabled" onclick="return confirm('Are you sure want to move to paid list?');">Move to Paid</button>
             <button type = "submit" name="latefee" value="0" class = "btn btn-primary sendnewsms"  disabled="disabled" onclick="return confirm('Are you sure want to enable late fee?');">Enable Late Fee</button>

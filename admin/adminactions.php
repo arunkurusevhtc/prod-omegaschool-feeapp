@@ -2939,9 +2939,19 @@ if (isset($_POST['filter']) && $_POST['filter'] == "filtercreatedchallan")
       $whereClauses[] ="section='".pg_escape_string ($sectionselect)."'"; 
     $where = ''; 
 
-    if (! empty($challanstatus)) 
-    $whereClauses[] ="deleted='".pg_escape_string ($challanstatus)."'"; 
-    $where = '';
+    if (! empty($challanstatus)){
+        if (!empty($challanstatus))
+        {
+            if($challanstatus=='3'){
+                $status=1;
+                $dalete = 0;
+            }else{
+                $status=0;
+                $dalete = 1;
+            }
+            $whereClauses[] ='status=\''.pg_escape_string($status).'\' AND deleted=\''.pg_escape_string($dalete).'\' ';
+        }
+    }
 
     if (count($whereClauses) > 0) 
     { 
@@ -2950,7 +2960,8 @@ if (isset($_POST['filter']) && $_POST['filter'] == "filtercreatedchallan")
     $studentid = "3576";
     $challanno = 'CBSE2018/010583';
     //$sql = ('SELECT * FROM  getchallandatanew '. $where. 'AND "challanStatus" = \'' . 0 . '\'');
-    $sql = ('SELECT * FROM  getchallandatanew '. $where. 'AND ("challanStatus" = \'0\' OR "challanStatus" = \'2\') AND deleted=\'0\' ');
+    //$sql = ('SELECT * FROM  getchallandatanew '. $where. 'AND ("challanStatus" = \'0\' OR "challanStatus" = \'2\') AND deleted=\'0\' ');
+    $sql = ('SELECT * FROM  getchallandatanew '. $where. 'AND ("challanStatus" = \'0\' OR "challanStatus" = \'2\') ');
     $res = sqlgetresult($sql, true);
     $challanData = array();
     $total = 0;
@@ -6906,6 +6917,60 @@ function deleteChallans($cn){
     return $status;
 }
 
+function enableDisableChallans($cn, $st){
+    $cn = trim($cn);
+    if($st == 1){
+        $dalete = 0;
+    }else{
+        $dalete = 1;
+    }
+    $status=0;
+    if(!empty($cn)){
+        $query1 = 'UPDATE tbl_demand SET status=\'' . $st . '\', deleted=\'' . $dalete . '\' WHERE "challanNo" = \'' . $cn . '\'';
+        $res1 = sqlgetresult($query1);
+
+        $query2 = 'UPDATE tbl_challans SET status=\'' . $st . '\', deleted=\'' . $dalete . '\' WHERE "challanNo"=\'' . $cn . '\' ';
+        $res2 = sqlgetresult($query2);
+
+        $query3 = 'UPDATE tbl_temp_challans SET status=\'' . $st . '\', deleted=\'' . $dalete . '\' WHERE "challanNo"=\'' . $cn . '\' ';
+        $res3 = sqlgetresult($query3);
+
+
+        $getwaiverdata = getwaiveddata(trim($cn));
+        if($getwaiverdata != 0){
+            $query4 = 'UPDATE tbl_waiver SET status=\'' . $st . '\', deleted=\'' . $dalete . '\' WHERE "challanNo"=\'' . $cn . '\' AND "studentId" = \'' . $getchallandata['studentId'] . '\' ';
+            $res4 = sqlgetresult($query4);
+        }
+
+        if (strpos($cn, 'TF-') !== false) {
+            $st = ($st==1)?0:1;
+            $query6 = 'UPDATE tbl_addtocart SET status=\'' . $st . '\' WHERE "challanNo"=\'' . $cn . '\' AND deleted=\'0\'';
+            $res6 = sqlgetresult($query6);
+        }
+
+        if (($res1[deleteupdate] == 0) && ($res2[deleteupdate] == 0) && ($res3[deleteupdate] == 0)) {
+          $status=1; 
+        } else {
+          $status=0;
+        }
+    }
+    return $status;
+}
+
+function enableDisableNonFeeChallans($cn, $st){
+    $cn = trim($cn);
+    $status=0;
+    if(!empty($cn)){
+        $query1 = 'UPDATE tbl_nonfee_challans SET status=\'' . $st . '\' WHERE "challanNo" = \'' . $cn . '\'';
+        $res1 = sqlgetresult($query1);
+        if($res1[deleteupdate] == 0) {
+          $status=1; 
+        } else {
+          $status=0;
+        }
+    }
+    return $status;
+}
 
 
 if (isset($_POST["submit"]) && $_POST["submit"] == "deletechallan")
@@ -6921,7 +6986,61 @@ if (isset($_POST["submit"]) && $_POST["submit"] == "deletechallan")
     $_SESSION['successdelete'] = "<p class='success-msg'>Deleted Successfully</p>";
     header('location:managecreatedchallans.php');
 }
+if (isset($_POST["submit"]) && $_POST["submit"] == "enablechallan")
+{   
+    $ids=isset($_POST['checkme'])?$_POST['checkme']:[];
+    if (count($ids) > 0)
+    {
+        foreach ($ids as $selected)
+        {
+          $status=enableDisableChallans($selected, 1);
+        }
+    }
+    $_SESSION['successdelete'] = "<p class='success-msg'>Enabled Successfully</p>";
+    header('location:managecreatedchallans.php');
+}
 
+if (isset($_POST["submit"]) && $_POST["submit"] == "disablechallan")
+{   
+    $ids=isset($_POST['checkme'])?$_POST['checkme']:[];
+    if (count($ids) > 0)
+    {
+        foreach ($ids as $selected)
+        {
+          $status=enableDisableChallans($selected, 0);
+        }
+    }
+    $_SESSION['successdelete'] = "<p class='success-msg'>Disabled Successfully</p>";
+    header('location:managecreatedchallans.php');
+}
+/* Non-Fee Challans */
+if (isset($_POST["submit"]) && $_POST["submit"] == "enablenfchallan")
+{   
+    $ids=isset($_POST['checkme'])?$_POST['checkme']:[];
+    if (count($ids) > 0)
+    {
+        foreach ($ids as $selected)
+        {
+          $status=enableDisableNonFeeChallans($selected, 1);
+        }
+    }
+    $_SESSION['success'] = "<p class='success-msg'>Enabled Successfully</p>";
+    header('location:createnonfeechallans.php');
+}
+
+if (isset($_POST["submit"]) && $_POST["submit"] == "disablenfchallan")
+{   
+    $ids=isset($_POST['checkme'])?$_POST['checkme']:[];
+    if (count($ids) > 0)
+    {
+        foreach ($ids as $selected)
+        {
+          $status=enableDisableNonFeeChallans($selected, 0);
+        }
+    }
+    $_SESSION['success'] = "<p class='success-msg'>Disabled Successfully</p>";
+    header('location:createnonfeechallans.php');
+}
 /*Resend Confirmation - Start */
 if (isset($_POST["resendconfirmation"]) && $_POST["resendconfirmation"] == "confirmation")
 {
