@@ -1,5 +1,5 @@
 <?php
-	include_once('admnavbar.php');
+	include_once('../header.php');
 ?>
 	       
 <div class="container login_box passchk">  
@@ -14,10 +14,15 @@
 		            unset($_SESSION['error_msg2']);
 		          }
 		        ?>
-			<form id="user_registered" method="post" action="adminactions.php">
+			<form id="user_registered" method="post" action="adminactions.php" onsubmit="return submitUserForm();">
 				<div class="form-group col-sm-12">
 					<label for ="email" class="lab">New Password</label>
 					<!-- <input type="hidden" name="email" value="<?php echo ($_SESSION['myadmin']['adminemail'])?>"> -->
+					<?php
+					if(isset($_GET['k'])){
+					echo ('<input type="hidden" name="email" value="'. $_GET['k'] .'">');
+				    }
+				    ?>
 					<input type="password" class="form-control" id="password" name="password" placeholder="New Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
                     <!-- <span id='error'></span> -->
                     <div id="message">
@@ -46,8 +51,12 @@
 					<input type="password" class="form-control"  id="password_confirmation" name="password_confirmation" placeholder="Confirm New Password" required>
                     <span id='error'></span>
 				</div>
+				<div class="form-group col-md-12">
+					<div class="form-group g-recaptcha" data-sitekey="<?php echo $recaptch_site_key; ?>" data-callback="verifyCaptcha"></div>
+	                <div id="g-recaptcha-error"></div>
+	            </div>
 				<div class="text-right form-group">
-					<button type="submit" name="changepass" value="change" id="ok" class="btn btn-sm sign">Change</button>
+					<button type="submit" name="changepassword" value="change" id="ok" class="btn btn-sm sign">Change</button>
 	  			</div>
             </form>
 			<!-- <div class="col-md-12 form-group">
@@ -75,16 +84,9 @@
        
     </div>
 </div>
-
-
-
-
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script src="<?php echo BASEURL;?>js/validate-captcha.js" type="text/javascript" async defer></script>
 <?php
-	 
-
-
-
-
 
 include_once(BASEPATH.'footer.php');
 ?>

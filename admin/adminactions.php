@@ -2085,7 +2085,51 @@ if (isset($_POST['submit']) && $_POST['submit'] == "getComments")
      
         /************Get Comments - End**********/
 
-
+if ((isset($_POST['changepassword']) && $_POST['changepassword'] == 'change'))
+{
+    $useremail = isset($_POST['email'])?trim($_POST['email']):"";
+    $recaptcha = isset($_POST["g-recaptcha-response"])?trim($_POST["g-recaptcha-response"]):"";
+    $isvalid=validatecaptcha($recaptcha, $recaptch_secret_key);
+    if($isvalid==0){
+        $_SESSION['error_msg2'] = "<p class='error-msg'>Invalid reCAPTACHA! Kindly try again.</p>";
+        header("Location: changepassword.php");
+        exit;
+    }else{
+        if($useremail){
+            $useremail=base64_decode($useremail);
+        }else{
+            $_SESSION['error_msg2'] = "<p class='error-msg'>Something went wrong !!</p>";
+            header("changepassword.php");
+            exit;
+        }
+        $newpassword = password_hash($_POST["password_confirmation"], PASSWORD_DEFAULT);
+        $sql1 = 'SELECT * from adminchk WHERE "adminEmail"=\'' . $useremail . '\'';
+        $result = sqlgetresult($sql1);
+        if (!empty($result))
+        {
+            $con = "SELECT * FROM changeadminpassword('$useremail','$newpassword')";
+            $result = sqlgetresult($con);
+        }else{
+            $result = 0;
+        }
+        
+        // print_r($con);
+        // exit;
+        if ($result = 1)
+        {
+            $_SESSION['success_msg2'] = "<p class='success-msg'>Password Changed Successfully</p>";
+            header("Location:login.php");
+            exit;
+        }
+        else
+        {
+            createErrorlog($result);
+            $_SESSION['error_msg2'] = "<p class='error-msg'>Reset Password is Invalid !!</p>";
+            header("changepassword.php");
+            exit;
+        }
+    }
+}
 if ((isset($_POST['changepass']) && $_POST['changepass'] == 'change'))
 {
     $useremail = $_SESSION['myadmin']['adminemail'];
@@ -7076,7 +7120,7 @@ if (isset($_POST["resendconfirmation"]) && $_POST["resendconfirmation"] == "conf
 // PHP FOR FORGOT PASSWORD AND UNLOCK ISTRUCTIONS
 /*Resend Confirmation - End */
 /*FORGOT PASSWORD - Start */
-if (isset($_POST['forgot']) && $_POST['forgot'] == "FORGOT PASSWORD")
+/*if (isset($_POST['forgot']) && $_POST['forgot'] == "FORGOT PASSWORD")
 {
     $e = isset($_POST["email"])?trim($_POST["email"]):"";
     $sql1 = 'SELECT * from adminchk WHERE "adminEmail"=\'' . $e . '\'';
@@ -7087,17 +7131,16 @@ if (isset($_POST['forgot']) && $_POST['forgot'] == "FORGOT PASSWORD")
         $name=ucfirst($result['adminName']);
         $churl=BASEURL."admin/changepassword.php?k=".base64_encode($to);
         $msg = "Hello " . $name . "! <br><br>";
-        $msg2 = "Someone has requested a link to change your password. You can do this through the link below.<br><br><a href='" . $churl . "'>Change my password</a><br><br>If you didn't request this, please ignore this email.<br><br>Your password won't change until you access the link above and create a new one.";
+        $msg2 = "Someone has requested a link to change your password. You can do this through the link below.<br><br><a href='" . $churl . "'>Change my password</a><br><br>If you didn't request this, please ignore this email.<br><br>Your password won't change until you access the link above and create a new one.";*/
         // $msg3 = "PASSWORD : ".$rpass."<br>";
         // print_r($msg2);
         // exit;
-        $subject = "Admin Login - Reset Password Instructions";
+       /* $subject = "Admin Login - Reset Password Instructions";
         $data = $msg . $msg2;
         $send = SendMailId($to, $subject, $data);
         if ($send == true)
         {
             $_SESSION['successmsg'] = "<div class='success-msg'>You will receive an email with instructions about how to reset your password in few minutes.</div>";
-            // echo($_SESSION['errormsg']);
             header('location:login.php');
         }
         else
@@ -7113,6 +7156,55 @@ if (isset($_POST['forgot']) && $_POST['forgot'] == "FORGOT PASSWORD")
         $errordata = 'Email:' . $eid . '</br>' . $_SESSION['errormsg'];
         createErrorlog($errordata);
         header("location:forgotpass.php");
+    }
+}*/
+if (isset($_POST['forgot']) && $_POST['forgot'] == "FORGOT PASSWORD")
+{
+    $e = isset($_POST["email"])?trim($_POST["email"]):"";
+    $recaptcha = isset($_POST["g-recaptcha-response"])?trim($_POST["g-recaptcha-response"]):"";
+    $isvalid=validatecaptcha($recaptcha, $recaptch_secret_key);
+    if($isvalid==0){
+        $_SESSION['errormsg'] = "<p class='error-msg'>Invalid reCAPTACHA! Kindly try again.</p>";
+        header("Location: forgotpass.php");
+        exit;
+    }else{
+        $sql1 = 'SELECT * from adminchk WHERE "adminEmail"=\'' . $e . '\'';
+        $result = sqlgetresult($sql1);
+        if (!empty($result))
+        {
+            $to = $e;
+            $name=ucfirst($result['adminName']);
+            $churl=BASEURL."admin/changepassword.php?k=".base64_encode($to);
+            $msg = "Hello " . $name . "! <br><br>";
+            $msg2 = "Someone has requested a link to change your password. You can do this through the link below.<br><br><a href='" . $churl . "'>Change my password</a><br><br>If you didn't request this, please ignore this email.<br><br>Your password won't change until you access the link above and create a new one.";
+            // $msg3 = "PASSWORD : ".$rpass."<br>";
+            // print_r($msg2);
+            // exit;
+            $subject = "Admin Login - Reset Password Instructions";
+            $data = $msg . $msg2;
+            $send = SendMailId($to, $subject, $data);
+            if ($send == true)
+            {
+                $_SESSION['success_msg2'] = "<div class='success-msg'>You will receive an email with instructions about how to reset your password in few minutes.</div>";
+                // echo($_SESSION['errormsg']);
+                header('location:login.php');
+                exit;
+            }
+            else
+            {
+                echo "Failure";
+                $errordata = 'Email:' . $e . '</br>';
+                createErrorlog($errordata);
+            }
+        }
+        else
+        {
+            $_SESSION['errormsg'] = "<div class='error-msg'>Email Not Found</div>";
+            $errordata = 'Email:' . $eid . '</br>' . $_SESSION['errormsg'];
+            createErrorlog($errordata);
+            header("location:forgotpass.php");
+            exit;
+        }
     }
 }
 /*FORGOT PASSWORD - End */
@@ -12130,5 +12222,22 @@ if (isset($_POST['excel']) && $_POST['excel'] == "sfsreceiptreportexport"){
 }
 
 // **********SFS RECEIPT REPORT EXPORT END************//
-
+function validatecaptcha($recaptcha, $recaptch_secret_key){
+    $secret_key = $recaptch_secret_key;
+    // Hitting request to the URL, Google will
+    // respond with success or error scenario
+    $url = 'https://www.google.com/recaptcha/api/siteverify?secret='
+      . $secret_key . '&response=' . $recaptcha;
+    // Making request to verify captcha
+    $response = file_get_contents($url);
+    // Response return by google is in
+    // JSON format, so we have to parse
+    $response = json_decode($response);
+    // Checking, if response is true or not
+    if ($response->success == true) {
+        return 1;
+    } else {
+         return 0;
+    }
+}
 ?>

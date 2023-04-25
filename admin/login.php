@@ -45,6 +45,9 @@
 				<div class="text-right col-md-12 form-group">
 					<button type="submit" name="login" value="signin" class="btn btn-sm signcss">Sign in</button>
 	  			</div>
+	  			<div class="col-md-12 form-group">
+		            <p><a class="link" href="forgotpass.php" >Forgot Password?</a></p>
+	            </div>
             </form>
            </div>
         <div class="col-xs-2 col-sm-2 col-md-3 col-lg-4"></div>
