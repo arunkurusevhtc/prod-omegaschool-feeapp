@@ -7283,10 +7283,10 @@ if (isset($_POST["submit"]) && $_POST["submit"] == "enablePartialPayment")
 /* Enable Student Status Active/Inactive */
 if (isset($_POST["std_status_change"]) && $_POST["std_status_change"] == "std_status_change")
 {
-    $uid = $_SESSION['myadmin']['adminid'];
+    $uid = isset($_SESSION['myadmin']['adminid'])?trim($_SESSION['myadmin']['adminid']):"";
     $ids = isset($_POST['checkme'])?$_POST['checkme']:[];
     $chkstatus = isset($_POST['changestatus'])?trim($_POST['changestatus']):"";
-    if (count($ids) > 0 && !empty($chkstatus) && isset($uid))
+    if (count($ids) > 0 && !empty($chkstatus) && !empty($uid))
     {
         if($chkstatus == 'Active'){
            $status=1;
@@ -7310,10 +7310,10 @@ if (isset($_POST["std_status_change"]) && $_POST["std_status_change"] == "std_st
 /* To Change Acadamic Year For the Student */
 if (isset($_POST["change_ay"]) && $_POST["change_ay"] == "edit_ay")
 {
-    $uid = $_SESSION['myadmin']['adminid'];
+    $uid = isset($_SESSION['myadmin']['adminid'])?trim($_SESSION['myadmin']['adminid']):"";
     $ids=isset($_POST['checkme'])?$_POST['checkme']:[];
     $yearselect=isset($_POST['yearselect'])?trim($_POST['yearselect']):"";
-    if (count($ids) > 0 && !empty($yearselect) && isset($uid))
+    if (count($ids) > 0 && !empty($yearselect) && !empty($uid))
     {
         foreach ($ids as $selected)
         {
@@ -7329,10 +7329,10 @@ if (isset($_POST["change_ay"]) && $_POST["change_ay"] == "edit_ay")
 /* To Change Term For the Student */
 if (isset($_POST["change_term"]) && $_POST["change_term"] == "edit_tm")
 {
-    $uid = $_SESSION['myadmin']['adminid'];
+    $uid = isset($_SESSION['myadmin']['adminid'])?trim($_SESSION['myadmin']['adminid']):"";
     $ids=isset($_POST['checkme'])?$_POST['checkme']:[];
     $semesterselect=isset($_POST['semesterselect'])?trim($_POST['semesterselect']):"";
-    if (count($ids) > 0 && !empty($semesterselect) && isset($uid))
+    if (count($ids) > 0 && !empty($semesterselect) && !empty($uid))
     {
         foreach ($ids as $selected)
         {
@@ -7349,17 +7349,15 @@ if (isset($_POST["change_term"]) && $_POST["change_term"] == "edit_tm")
 /* To Change Stream/Class/Section For the Student */
 if (isset($_POST["change_stream_class"]) && $_POST["change_stream_class"] == "edit_stream_class")
 {
-    $uid = $_SESSION['myadmin']['adminid'];
+    $uid = isset($_SESSION['myadmin']['adminid'])?trim($_SESSION['myadmin']['adminid']):"";
     $ids=isset($_POST['checkme'])?$_POST['checkme']:[];
-    $stream = isset($_POST['managestdstream'])?trim($_POST['managestdstream']):"";
+    $stream = isset($_POST['streamselect'])?trim($_POST['streamselect']):"";
     $class = isset($_POST['classselect'])?trim($_POST['classselect']):"";
     $section = isset($_POST['sectionselect'])?trim($_POST['sectionselect']):"";
-    
-    if (count($ids) > 0 && !empty($stream) && !empty($class) && !empty($section) && isset($uid))
+    if (count($ids) > 0 && !empty($stream) && !empty($class) && !empty($section) && !empty($uid))
     {
         foreach ($ids as $selected)
         {
-        //    $query = "SELECT * FROM tochangeterminstudtbl('$selected','$stream','$class','$section','$uid')";
            $query = "SELECT * FROM tochangestreamclassstud('$selected','$uid','$stream','$class','$section')";
            $run = sqlgetresult($query);
         }
