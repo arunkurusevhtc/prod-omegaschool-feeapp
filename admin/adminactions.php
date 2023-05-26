@@ -8968,11 +8968,11 @@ if(isset($_POST['paytotal_adm']) && $_POST['paytotal_adm']=='partial'){
                     if(isset($balance) && !empty($balance)){
                         $curbalance=toGetAvailableBalance($sid);
                         $upewal=$curbalance-$balance;
-                        $wallet = sqlgetresult("SELECT * FROM addAdvanceAmt('".$sid."','$upewal','".$parent_id."')");
+                        $wallet = sqlgetresult("SELECT * FROM addadvanceamt('".$sid."','$upewal','".$parent_id."')");
 
                         $resadv=$wallet['addadvanceamt']?$wallet['addadvanceamt']:"";
                         if(!empty($resadv)){
-                            $run1=sqlgetresult("SELECT * FROM createadvancetransaction('$sid','$parent_id','','$balance','$curbalance','2','Ok','$lastinsert_id','$challanNo','1','$class','$acad_year','$stream','$term','$section')",true);
+                            $run1=sqlgetresult("SELECT * FROM createadvancetransaction('$sid','$parent_id',NULL,'$balance','$curbalance','2','Ok','$lastinsert_id','$eventname','1','$class','$academicYear','$stream','$term','$section')",true);
                         }
                         $amount=$amount+$balance;
                     }
