@@ -6929,6 +6929,8 @@ function deleteChallans($cn){
         $query3 = 'DELETE FROM tbl_temp_challans WHERE "challanNo"=\'' . $cn . '\' ';
         $res3 = sqlgetresult($query3);
 
+        $rm=toRemoveFromCart($cn, 1);
+
         /* Reset Challan Create & Due date*/
         /*if($getchallandata['studentId']){
            toResetChallanDates($getchallandata['studentId']); 
@@ -6961,6 +6963,24 @@ function deleteChallans($cn){
     return $status;
 }
 
+function toRemoveFromCart($cn, $delete){
+    $cn = trim($cn);
+    //date_default_timezone_set('Asia/Calcutta');
+    $createdOn = date("Y-m-d h:m:s");
+    $uid = $_SESSION['myadmin']['adminid'];
+    $ot=0;
+    if (strpos($cn, 'TF-') !== false) {
+        if($delete == 1){
+           $query6 = 'UPDATE tbl_addtocart SET deleted=\'' . $delete . '\', delbyadm=\'1\', "updatedBy"=\'' . $uid . '\', "updatedOn"=\'' . $createdOn . '\' WHERE "challanNo"=\'' . $cn . '\' AND status=\'0\' AND deleted=\'0\'';
+        }else{
+           $query6 = 'UPDATE tbl_addtocart SET deleted=\'' . $delete . '\', "updatedBy"=\'' . $uid . '\', "updatedOn"=\'' . $createdOn . '\' WHERE "challanNo"=\'' . $cn . '\' AND status=\'0\' AND delbyadm=\'1\'  AND deleted=\'1\'';
+        }
+        $res6 = sqlgetresult($query6);
+        $ot=1;
+    }
+    return $ot;
+}
+
 function enableDisableChallans($cn, $st){
     $cn = trim($cn);
     if($st == 1){
@@ -6986,11 +7006,13 @@ function enableDisableChallans($cn, $st){
             $res4 = sqlgetresult($query4);
         }
 
-        if (strpos($cn, 'TF-') !== false) {
+        /*if (strpos($cn, 'TF-') !== false) {
             $st = ($st==1)?0:1;
             $query6 = 'UPDATE tbl_addtocart SET status=\'' . $st . '\' WHERE "challanNo"=\'' . $cn . '\' AND deleted=\'0\'';
             $res6 = sqlgetresult($query6);
-        }
+        }*/
+
+        $rm=toRemoveFromCart($cn, $dalete);
 
         if (($res1[deleteupdate] == 0) && ($res2[deleteupdate] == 0) && ($res3[deleteupdate] == 0)) {
           $status=1; 
