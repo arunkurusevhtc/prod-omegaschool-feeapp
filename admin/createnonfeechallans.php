@@ -98,6 +98,12 @@
                 </select>           
             </div>
             <div class="form-group">
+                <select id="challanstatus" name="challanstatus"  class="challanstatus  form-control">
+                    <option value="1">Active</option>                       
+                    <option value="2">In Active</option>                       
+                </select>
+            </div>
+            <div class="form-group">
                 <button type="button" id="fltcreatenonfeechallan" name="fltcreatenonfeechallan" class="btn btn-info">Filter</button>
             </div>
             <div class="form-group">
@@ -108,7 +114,7 @@
 </div>
 <div class="col-md-12 m-t-15" >
     <div class="table-responsive">
-        <form>
+        <form method="post" action="adminactions.php">
             <table class="table table-bordered admintab dataTableNonfee">
                 <thead>
                      <tr>
@@ -120,6 +126,8 @@
                     </tr>
                 </thead>
             </table>
+            <button type = "submit" name="submit" id="clickme" value="enablenfchallan" class = "btn btn-primary sendnewsms"  disabled="disabled" onclick="return confirm('Are you sure want to enable?');">Enable</button>
+            <button type = "submit" name="submit" id="clickme" value="disablenfchallan" class = "btn btn-warning sendnewsms"  disabled="disabled" onclick="return confirm('Are you sure want to disable?');">Disable</button>
         </form>
     </div>
 </div>

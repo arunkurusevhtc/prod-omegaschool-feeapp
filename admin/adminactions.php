@@ -77,6 +77,7 @@ if (isset($_POST["login"]) && $_POST["login"] == "signin")
 /*****Common Status Change Function - Start*****/
 if (isset($_GET['status']) && $_GET['page'] != '')
 {
+    $rmfrmcart=0;
     if ($_GET['page'] == 't')
     {
         $tbl = 'tbl_teachers';
@@ -121,6 +122,7 @@ if (isset($_GET['status']) && $_GET['page'] != '')
     {
         $tbl = 'tbl_fee_type';
         $page = 'managefeetype.php';
+        $rmfrmcart=1;
     }
     elseif ($_GET['page'] == 'com')
     {
@@ -146,6 +148,7 @@ if (isset($_GET['status']) && $_GET['page'] != '')
     {
         $tbl = 'tbl_nonfee_type';
         $page = 'nonfeetype.php';
+        $rmfrmcart=1;
     }
     elseif ($_GET['page'] == 'product') {
         $tbl = 'tbl_products';
@@ -185,10 +188,12 @@ if (isset($_GET['status']) && $_GET['page'] != '')
     if ($_GET["status"] == "ACTIVE")
     {
         $status = 0;
+        $delCart = 1;
     }
     else
     {
         $status = 1;
+        $delCart = 0;
     }
 
     $id = $_REQUEST['id'];
@@ -210,6 +215,9 @@ if (isset($_GET['status']) && $_GET['page'] != '')
     //if ($res["statusupdate"] == 1)
     if (count($res) > 0)
     {
+        if($rmfrmcart){
+           toRemoveFromCartByFeeType($id, $delCart, $_GET['page']);
+        }
         $_SESSION['success'] = "<p class='success-msg'>Change Status Was Done Successfully</p>";
         header("Location:" . $page);
     }
@@ -6963,6 +6971,49 @@ function deleteChallans($cn){
     return $status;
 }
 
+function toRemoveFromCartByNFWC($cn, $delete){
+    $cn = trim($cn);
+    $createdOn = date("Y-m-d h:m:s");
+    $uid = $_SESSION['myadmin']['adminid'];
+    $ot=0;
+    $sql1 = 'SELECT * from tbl_addtocart WHERE "challanNo"=\'' . $cn . '\' AND status=\'0\'';
+    $result = sqlgetresult($sql1);
+    if (!empty($result)) {
+        if($delete == 1){
+           $query6 = 'UPDATE tbl_addtocart SET deleted=\'' . $delete . '\', delbyadm=\'1\', "updatedBy"=\'' . $uid . '\', "updatedOn"=\'' . $createdOn . '\' WHERE "challanNo"=\'' . $cn . '\' AND status=\'0\' AND deleted=\'0\'';
+        }else{
+           $query6 = 'UPDATE tbl_addtocart SET deleted=\'' . $delete . '\', "updatedBy"=\'' . $uid . '\', "updatedOn"=\'' . $createdOn . '\' WHERE "challanNo"=\'' . $cn . '\' AND status=\'0\' AND delbyadm=\'1\'  AND deleted=\'1\'';
+        }
+        $res6 = sqlgetresult($query6);
+        $ot=1;
+    }
+    return $ot;
+}
+
+function toRemoveFromCartByFeeType($cn, $delete, $type){
+    $cn = trim($cn);
+    $createdOn = date("Y-m-d h:m:s");
+    $uid = $_SESSION['myadmin']['adminid'];
+    $ot=0;
+    if($type == 'nf'){
+        $wherecond= ' AND type=\'6\'';
+    }else{
+        $wherecond= ' AND type!=\'6\'';
+    }
+    $sql1 = 'SELECT * from tbl_addtocart WHERE "feeType"=\'' . $cn . '\' AND status=\'0\''.$wherecond;
+    $result = sqlgetresult($sql1);
+    if (!empty($result)) {
+        if($delete == 1){
+           $query6 = 'UPDATE tbl_addtocart SET deleted=\'' . $delete . '\', delbyadm=\'1\', "updatedBy"=\'' . $uid . '\', "updatedOn"=\'' . $createdOn . '\' WHERE "feeType"=\'' . $cn . '\' AND status=\'0\' AND deleted=\'0\''.$wherecond;
+        }else{
+           $query6 = 'UPDATE tbl_addtocart SET deleted=\'' . $delete . '\', "updatedBy"=\'' . $uid . '\', "updatedOn"=\'' . $createdOn . '\' WHERE "feeType"=\'' . $cn . '\' AND status=\'0\' AND delbyadm=\'1\'  AND deleted=\'1\''.$wherecond;
+        }
+        $res6 = sqlgetresult($query6);
+        $ot=1;
+    }
+    return $ot;
+}
+
 function toRemoveFromCart($cn, $delete){
     $cn = trim($cn);
     //date_default_timezone_set('Asia/Calcutta');
@@ -7026,10 +7077,16 @@ function enableDisableChallans($cn, $st){
 function enableDisableNonFeeChallans($cn, $st){
     $cn = trim($cn);
     $status=0;
+    if($st == 1){
+        $dalete = 0;
+    }else{
+        $dalete = 1;
+    }
     if(!empty($cn)){
-        $query1 = 'UPDATE tbl_nonfee_challans SET status=\'' . $st . '\' WHERE "challanNo" = \'' . $cn . '\'';
+        $query1 = 'UPDATE tbl_nonfee_challans SET status=\'' . $st . '\' WHERE "challanNo" = \'' . $cn . '\'  RETURNING id';
         $res1 = sqlgetresult($query1);
-        if($res1[deleteupdate] == 0) {
+        if($res1['id']) {
+          $rm=toRemoveFromCartByNFWC($cn, $dalete);
           $status=1; 
         } else {
           $status=0;
@@ -11479,6 +11536,7 @@ if (isset($_POST['filter']) && $_POST['filter'] == "fltcreatenonfeechallan")
     $type = isset($_POST['type'])?$_POST['type']:1;
     $from = isset($_POST['from'])?$_POST['from']:"";
     $to = isset($_POST['to'])?$_POST['to']:"";
+    $challanstatus = isset($_POST['challanstatus'])?$_POST['challanstatus']:"";
     $selected_feetypes=[];
     $squery=[];
     $qtxt="";
@@ -11519,6 +11577,16 @@ if (isset($_POST['filter']) && $_POST['filter'] == "fltcreatenonfeechallan")
         $where[] = 'DATE("created") BETWEEN \'' . $from . '\'  AND  \'' . $to . '\'';
     }
 
+    if (!empty($challanstatus))
+    {
+        if($challanstatus=='2'){
+          $status=0;
+        }else{
+          $status=1;
+        }
+        $where[] = '"chlstatus"=\'' .pg_escape_string($status).'\' ';
+    }
+
     if($qtxt){
         $where[] ='('.$qtxt.')' ;
     }
@@ -11528,7 +11596,7 @@ if (isset($_POST['filter']) && $_POST['filter'] == "fltcreatenonfeechallan")
       $wherecond = ' WHERE '.implode(' AND ',$where); 
     }
 
-    $sql='SELECT * FROM nonfeechallandata '.$wherecond.' ORDER BY "created" DESC';
+    $sql='SELECT * FROM nonfeechallandataforadm '.$wherecond.' ORDER BY "created" DESC';
     $_SESSION['nonfeechallanquery']=$sql;
     $data =sqlgetresult($sql,true);
 
