@@ -1771,7 +1771,7 @@ if (isset($_GET['c']) && $_GET['c'] != '')
                     if ($chkNew && $textconcat!='transport') {
                         sendNotificationToApplParents($studentId, $mailbody, $smsbody, $type);
                     }else{
-                        sendNotificationToParents($studentId, $mailbody, $smsbody, $type); 
+                        //sendNotificationToParents($studentId, $mailbody, $smsbody, $type); 
                     }
                 }
                 
@@ -1893,7 +1893,7 @@ if (isset($_GET['c']) && $_GET['c'] != '')
                 if ($chkNew && $textconcat!='transport') {
                     sendNotificationToApplParents($studentId, $mailbody, $smsbody, $type);
                 }else{
-                    sendNotificationToParents($studentId, $mailbody, $smsbody, $type,'','Notification From Omega'); 
+                    //sendNotificationToParents($studentId, $mailbody, $smsbody, $type,'','Notification From Omega'); 
                 } 
             }       
             header('location:managecreatedchallans.php');        
