@@ -2716,6 +2716,16 @@ if (isset($_POST['cartchkout']) && $_POST['cartchkout'] == "pay"){
         $productData = sqlgetresult("SELECT * FROM tbl_accounts WHERE id = '$acc_id' ");
         $cartdata = sqlgetresult('SELECT * FROM cartlistlunuf WHERE "studentId" =\'' . $studId . '\' AND deleted=0 AND status=0',true);
         $num=count($cartdata);
+        $productArr = array();  
+        function productAmt(&$productArr, $pname, $amount){
+            $pname = trim($pname);
+            if(isset($productArr[$pname])){
+                $productArr[$pname]+=$amount;
+            }else{
+                $productArr[$pname]=$amount;
+            }
+            return $productArr; 
+        }
 
         if($num > 0){
           $productmap='<products>';
@@ -2753,7 +2763,8 @@ if (isset($_POST['cartchkout']) && $_POST['cartchkout'] == "pay"){
                 $total+=$amount;
                 /*SFS*/
                 $pname = $productData['1244172000018485'];
-                $productmap .= '<product><id>'.$i.'</id><name>'.trim($pname).'</name><amount>'.$amount.'</amount></product>'; 
+                $productmap .= '<product><id>'.$i.'</id><name>'.trim($pname).'</name><amount>'.$amount.'</amount></product>';
+                productAmt($productArr, $pname, $amount); 
 
                 $run1=sqlgetresult("SELECT * FROM createotherfeestransaction('$sid','$uid','$amount','$oftypeid','$feeconfigid','$feetypeid','$quantity','$cusChallanNo','$class','$academicYear','$stream','$term','$section','$pay_type')",true);
                 $lastinsert_id = isset($run1[0]['createotherfeestransaction'])?$run1[0]['createotherfeestransaction']:""; 
@@ -2778,6 +2789,8 @@ if (isset($_POST['cartchkout']) && $_POST['cartchkout'] == "pay"){
                 $pname = $productData['1244172000004377'];
                 $productmap .= '<product><id>'.$i.'</id><name>'.trim($pname).'</name><amount>'.$amount.'</amount></product>'; 
 
+                productAmt($productArr, $pname, $amount);
+
                 $run1=sqlgetresult("SELECT * FROM createotherfeestransaction('$sid','$uid','$amount','$oftypeid','$feeconfigid','$feetypeid','$quantity','$cusChallanNo','$class','$academicYear','$stream','$term','$section','$pay_type')",true);
                 $lastinsert_id = isset($run1[0]['createotherfeestransaction'])?$run1[0]['createotherfeestransaction']:""; 
                 if($lastinsert_id){
@@ -2800,6 +2813,7 @@ if (isset($_POST['cartchkout']) && $_POST['cartchkout'] == "pay"){
                 /*SFS*/
                 $pname = $productData['1244172000004377'];
                 $productmap .= '<product><id>'.$i.'</id><name>'.trim($pname).'</name><amount>'.$amount.'</amount></product>'; 
+                productAmt($productArr, $pname, $amount);
 
                 $run1=sqlgetresult("SELECT * FROM createotherfeestransaction('$sid','$uid','$amount','$oftypeid','$feeconfigid','$feetypeid',NULL,'$cusChallanNo','$class','$academicYear','$stream','$term','$section','$pay_type')",true);
                 $lastinsert_id = isset($run1[0]['createotherfeestransaction'])?$run1[0]['createotherfeestransaction']:""; 
@@ -2818,7 +2832,8 @@ if (isset($_POST['cartchkout']) && $_POST['cartchkout'] == "pay"){
                 $total+=$amount;
                 /*SFS*/
                 $pname = $productData['1244172000018485'];
-                $productmap .= '<product><id>'.$i.'</id><name>'.trim($pname).'</name><amount>'.$amount.'</amount></product>'; 
+                $productmap .= '<product><id>'.$i.'</id><name>'.trim($pname).'</name><amount>'.$amount.'</amount></product>';
+                productAmt($productArr, $pname, $amount); 
 
                 $run1=sqlgetresult("SELECT * FROM createotherfeestransaction('$sid','$uid','$amount','$oftypeid',NULL,NULL,NULL,'$cusChallanNo','$class','$academicYear','$stream','$term','$section','$pay_type')",true);
                 $lastinsert_id = isset($run1[0]['createotherfeestransaction'])?$run1[0]['createotherfeestransaction']:""; 
@@ -2853,6 +2868,7 @@ if (isset($_POST['cartchkout']) && $_POST['cartchkout'] == "pay"){
                     $pname = $productData[$accid];
                     $prodtxt = '<product><id>'.$i.'</id><name>'.trim($pname).'</name><amount>'.$amount.'</amount></product>';
                     $productmap.=$prodtxt;
+                    productAmt($productArr, $pname, $amount);
                    // echo "SELECT * FROM createnfwcpayment('$sid','$cusChallanNo','$cusId','$prodtxt','$amount','$payop','$payment_method')";
                    // exit;
                     $run1=sqlgetresult("SELECT * FROM createnfwcpayment('$sid','$cusChallanNo','$cusId','$prodtxt','$amount','$payop','$payment_method')",true);
@@ -2880,6 +2896,7 @@ if (isset($_POST['cartchkout']) && $_POST['cartchkout'] == "pay"){
                 //$pname = $productData['1244172000114886'];
                 $pname = $productData[$accid];
                 $productmap .= '<product><id>'.$i.'</id><name>'.trim($pname).'</name><amount>'.$amount.'</amount></product>'; 
+                productAmt($productArr, $pname, $amount);
                 $payment_id = sqlgetresult('INSERT INTO tbl_nonfee_payments ("studentId","parentId","academicYear","term","stream","classList","section","paymethod","paymode","amount","sid","cartid","feeconfigid","feetypeid") VALUES (\''.$studId.'\',\''.$uid.'\',\''.$academicYear.'\',\''.$term.'\',\''.$stream.'\',\''.$class.'\',\''.$section.'\',\''.$payment_method.'\',\'Online\',\''.$amount.'\',\''.$sid.'\',\''.$id.'\',\''.$feeconfigid.'\',\''.$feetypeid.'\') RETURNING id');
                 $lastinsert_id=isset($payment_id['id'])?$payment_id['id']:"";
                 if($lastinsert_id){
@@ -2893,13 +2910,21 @@ if (isset($_POST['cartchkout']) && $_POST['cartchkout'] == "pay"){
             $i++;
           }
           $productmap.='</products>';
+            /* Recently Added To avoid dulicate */
+            $productmapnew='<products>';
+            $k=1;  
+            foreach ($productArr as $name => $amt) {
+              $productmapnew .= '<product><id>'.$k.'</id><name>'.$name.'</name><amount>'.$amt.'</amount></product>';
+              $k++; 
+            }
+            $productmapnew.='</products>';
 
 
           if(count($refnumber) > 0 && $total >0){
              $refids=implode(",",$refnumber);
              $ref_chal_ids=implode(",",$ref_chal);
              $ref_chal_ids=substr($ref_chal_ids,0,500);
-             $run2=sqlgetresult("SELECT * FROM createcartfeetransaction('$sid','$uid','$total','$total','$refids','$productmap',NULL,'$class','$academicYear','$stream','$term','$section','$pay_type')",true);
+             $run2=sqlgetresult("SELECT * FROM createcartfeetransaction('$sid','$uid','$total','$total','$refids','$productmapnew',NULL,'$class','$academicYear','$stream','$term','$section','$pay_type')",true);
              $cart_lastinsert_id = isset($run2[0]['createcartfeetransaction'])?$run2[0]['createcartfeetransaction']:"";
 
              if($cart_lastinsert_id){
@@ -2928,7 +2953,7 @@ if (isset($_POST['cartchkout']) && $_POST['cartchkout'] == "pay"){
                 $transactionRequest->setCustomerChallanNo($ref_chal_ids);
                 $transactionRequest->setCustomerMobile($cusMobile);
                 $transactionRequest->setCustomerBillingAddress("Chennai");
-                $transactionRequest->setProducts($productmap);
+                $transactionRequest->setProducts($productmapnew);
                 $transactionRequest->setCustomerAccount("639827");
                 $transactionRequest->setReqHashKey($ReqHashKey);
 
