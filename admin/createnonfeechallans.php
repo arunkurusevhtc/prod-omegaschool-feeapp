@@ -118,6 +118,7 @@
             <table class="table table-bordered admintab dataTableNonfee">
                 <thead>
                      <tr>
+                        <th><input type="checkbox" id="checkAll"></th>
                         <?php foreach ($columns as $key => $value) { ?>
                         <th><?php echo $value; ?></th>
                         <?php    
