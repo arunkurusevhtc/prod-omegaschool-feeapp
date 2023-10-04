@@ -7994,49 +7994,29 @@ if (isset($_POST['filter']) && $_POST['filter'] == "fltconsolidatereport")
             if(isset($wdata['waiver_total']) && !empty($wdata['waiver_total'])){
                 $waived+=$wdata['waiver_total'];
             }
-
-            /*$pdata=getTotalPaidbychallan($challanno);
-            if(isset($pdata['paid_total']) && !empty($pdata['paid_total'])){
-                $paid+=$pdata['paid_total'];
-            }
-           $advpaid+=getPaidbyAdvancechallan($challanno);*/
-           //$paid+=getAmtPaidbychallan($challanno);
-           $paid+=getReceiptChallan($challanno);
-           $partialpaid+=getReceiptChallanPartial($challanno);
+            $paid+=getReceiptChallanReceipt($challanno);
+            $partialpaid+=getReceiptChallanPartial($challanno);
 
         }
-        /*if($waived > 0 && $paid > 0){
-            if($paid >= $waived){
-                $receiptAmt=$paid-$waived; 
-            }else{
-                $receiptAmt=$waived-$paid; 
-            }
-        }else{
-            $receiptAmt=$paid;
-        }*/
         if($paid > 0){
-               $receiptAmt1=$demand-$waived; 
-             }
+            $receiptAmt1=$paid;
+        }
 
-             if($partialpaid > 0){
-               $receiptAmt2=$partialpaid; 
-             }
+        if($partialpaid > 0){
+            $receiptAmt2=$partialpaid; 
+        }
+        $totalpaid=$receiptAmt1+$receiptAmt2;
+        $paidDm1= $receiptAmt1;
+        $paidDm2= $receiptAmt2; 
+        $paidDm=$paidDm1+$paidDm2;
 
-             $totalpaid=$receiptAmt1+$receiptAmt2;
-
-
-             //if($paid > 0){
-               $paidDm1= $receiptAmt1+$waived;
-             //}
-
-             //if($partialpaid > 0){
-               $paidDm2=$receiptAmt2; 
-             //}
-
-             $paidDm=$paidDm1+$paidDm2;
         $res[$key]['waiver']=$waived;
         $res[$key]['receipt']=$totalpaid;
-        $res[$key]['outstanding']=$demand-$paidDm;
+        $outst = $demand-$totalpaid;
+        if($outst > 0 && $outst >=$waived ){
+           $outst = $outst-$waived;
+        }
+        $res[$key]['outstanding']=$outst;
         unset($res[$key]['challanids']);
     }
 
@@ -8081,51 +8061,28 @@ $sqlrun = sqlgetresult($sql, true);
                 if(isset($wdata['waiver_total']) && !empty($wdata['waiver_total'])){
                     $waived+=$wdata['waiver_total'];
                 }
-                /*$pdata=getTotalPaidbychallan($challanno);
-                if(isset($pdata['paid_total']) && !empty($pdata['paid_total'])){
-                    $paid+=$pdata['paid_total'];
-                }
-                $advpaid+=getPaidbyAdvancechallan($challanno);*/
-                //$paid+=getAmtPaidbychallan($challanno);
-                $paid+=getReceiptChallan($challanno);
+                //$paid+=getReceiptChallan($challanno);
+                $paid+=getReceiptChallanReceipt($challanno);
                 $partialpaid+=getReceiptChallanPartial($challanno);
             }
-            /*if($waived > 0 && $paid > 0){
-                if($paid >= $waived){
-                    $receiptAmt=$paid-$waived; 
-                }else{
-                    $receiptAmt=$waived-$paid; 
-                }
-            }else{
-                $receiptAmt=$paid;
-            }*/
             if($paid > 0){
-               $receiptAmt1=$demand-$waived; 
-             }
+                $receiptAmt1=$paid;
+            }
 
-             if($partialpaid > 0){
-               $receiptAmt2=$partialpaid; 
-             }
-
-             $totalpaid=$receiptAmt1+$receiptAmt2;
-
-
-             //if($paid > 0){
-               $paidDm1= $receiptAmt1+$waived;
-             //}
-
-             //if($partialpaid > 0){
-               $paidDm2=$receiptAmt2; 
-             //}
-
-             $paidDm=$paidDm1+$paidDm2;
+            if($partialpaid > 0){
+                $receiptAmt2=$partialpaid; 
+            }
+            $totalpaid=$receiptAmt1+$receiptAmt2;
+            $paidDm1= $receiptAmt1;
+            $paidDm2= $receiptAmt2; 
+            $paidDm=$paidDm1+$paidDm2;
             $result_data[$key]['Waiver']=$waived;
-            //$result_data[$key]['Receipt']=$paid;
             $result_data[$key]['receipt']=$totalpaid;
-            //$result_data[$key]['AdvancePaid']=$advpaid;
-            //$result_data[$key]['Outstanding']=$demand-$paid-$waived;
-            $result_data[$key]['outstanding']=$demand-$paidDm;
-                
+            $outst = $demand-$totalpaid;
+            if($outst > 0 && $outst >=$waived ){
+               $outst = $outst-$waived;
+            }
+            $result_data[$key]['outstanding']=$outst;
         }
         foreach ($result_data as $k => $v) {
         $keys = array();

@@ -1818,16 +1818,12 @@ if (isset($_POST['filter']) && $_POST['filter'] == "fltconsolidatereport")
                     $waived+=$wdata['waiver_total'];
                 }
 
-               //$paid+=getAmtPaidbychallan($challanno);
-                $paid+=getReceiptChallan($challanno);
-                $partialpaid+=getReceiptChallanPartial($challanno);
+               $paid+=getReceiptChallanReceipt($challanno);
+               $partialpaid+=getReceiptChallanPartial($challanno);
 
             }
-
-
-
-             if($paid > 0){
-               $receiptAmt1=$demand-$waived; 
+            if($paid > 0){
+                $receiptAmt1=$paid;
              }
 
              if($partialpaid > 0){
@@ -1836,41 +1832,17 @@ if (isset($_POST['filter']) && $_POST['filter'] == "fltconsolidatereport")
 
              $totalpaid=$receiptAmt1+$receiptAmt2;
 
-
-             //if($paid > 0){
-               $paidDm1= $receiptAmt1+$waived;
-             //}
-
-             //if($partialpaid > 0){
-               $paidDm2=$receiptAmt2; 
-             //}
-
              $paidDm=$paidDm1+$paidDm2;
-
-
-
-         /*if($waived > 0 && $paid > 0){
-                if($paid >= $waived){
-                    $receiptAmt=$paid-$waived; 
-                }else{
-                    $receiptAmt=$paid;
-                }
-            }else{
-                $receiptAmt=$paid;
-            }*/
-
-            /*if($paid > 0){
-                 $demand-$waived;
-            }*/
-
-
-            //$$demand
-
-
 
             $res[$key]['waiver']=$waived;
             $res[$key]['receipt']=$totalpaid;
-            $res[$key]['outstanding']=$demand-$paidDm;
+
+            $outst = $demand-$totalpaid;
+            if($outst > 0 && $outst >=$waived ){
+               $outst = $outst-$waived;
+            }
+            $res[$key]['outstanding']=$outst;
+            
             //$res[$key]['outstanding']=$demand-$paid;
             unset($res[$key]['challanids']);
         }

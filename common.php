@@ -3568,6 +3568,14 @@ function getReceiptChallan($challanno){
 	return $tot;
 }
 
+function getReceiptChallanReceipt($challanno){
+	$data = sqlgetresult('SELECT SUM(org_total) AS org_total FROM tbl_receipt WHERE "challanNo" = \''.$challanno.'\' AND "challanStatus" = \'1\' ');
+    $tot=0;
+	if(isset($data['org_total']) && !empty($data['org_total'])){
+        $tot=$data['org_total'];
+    }
+	return $tot;
+}
 
 function getTotalPaidbychallan($challanno){
 	$data = sqlgetresult('SELECT SUM(paidamt) AS paid_total FROM tbl_partialpaid_challan WHERE "challanNo" = \''.$challanno.'\' AND deleted=0');
